@@ -13,4 +13,6 @@ RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 
 ENV PATH=/google-cloud-sdk/bin:$PATH
 
+ADD install-citc.py
+
 ENTRYPOINT ["bash"]
