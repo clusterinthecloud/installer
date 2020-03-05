@@ -9,5 +9,5 @@ Version 2.0.0
 Current repos which are part of the project are:
 
 - [User documentation](https://github.com/ACRC/cluster-in-the-cloud)
-- [Oracle Terraform scripts](https://github.com/ACRC/oci-cluster-terraform)
+- [Terraform scripts for different Cloud Service Providers](https://github.com/ACRC/citc-terraform)
 - [Playbooks for configuring the cluster](https://github.com/ACRC/slurm-ansible-playbook)
