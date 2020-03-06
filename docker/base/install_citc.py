@@ -338,7 +338,7 @@ def run_everything(args):
         print(f"[EXECUTE] {cmd}")
         try:
             args = shlex.split(cmd)
-            p = subprocess.run(args)
+            p = subprocess.run(args, capture_output=True)
             cluster_ip = p.stdout.strip()
         except Exception as e:
             print(f"[ERROR] {e}")
