@@ -153,13 +153,19 @@ def run_everything(args):
     while not user_pubkey:
         user_pubkey = input("Please copy here you public SSH key: ")
 
-    if os.path.exists(user_pubkey):
-        user_pubkey = open(user_pubkey, "r").readline().strip()
+    user_keyfile = os.path.expanduser(user_pubkey)
 
-    elif user_pubkey.startswith("http"):
+    if user_pubkey.startswith("http"):
         import urllib.request;
         s = urllib.request.urlopen(user_pubkey).read().decode()
         user_pubkey = str(s)
+
+    elif not user_keyfile.startswith("ssh"):
+        if os.path.exists(user_keyfile):
+            user_pubkey = open(user_keyfile, "r").readline().strip()
+        else:
+            print(f"[ERROR] Unable to open keyfile {user_keyfile}")
+            sys.exit(-1)
 
     if not cluster_name:
         cluster_name = petname.generate()
