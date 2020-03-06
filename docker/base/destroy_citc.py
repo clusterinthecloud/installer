@@ -130,10 +130,12 @@ def run_everything(args):
 
     has_completed("everything")
 
-    print("\n\nYour Cluster-in-the-Cloud has now been deleted :-(")
+    print("\n\nYour Cluster-in-the-Cloud has now been deleted :-(\n")
 
 try:
     run_everything(args)
 except Exception as e:
     print(f"[ERROR] {e}")
     sys.exit(-1)
+
+print("{\"status\":\"0\"}")

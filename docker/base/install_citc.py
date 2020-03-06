@@ -393,4 +393,4 @@ except Exception as e:
     print(f"[ERROR] {e}")
     sys.exit(-1)
 
-print("{\"cluster_ip\":\"%s\"}" % cluster_ip)
+print("{\"status\":\"0\", \"cluster_ip\":\"%s\"}" % cluster_ip)
