@@ -3,6 +3,7 @@ FROM hashicorp/terraform:0.12.21
 ARG GCLOUD=272.0.0
 
 RUN apk add --update bash openssh curl python3
+RUN pip3 install petname
 
 RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD}-linux-x86_64.tar.gz> cloud-sdk.tgz && \
     tar zxf cloud-sdk.tgz && \
@@ -13,6 +14,6 @@ RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 
 ENV PATH=/google-cloud-sdk/bin:$PATH
 
-ADD install-citc.py
+ADD install_citc.py .
 
 ENTRYPOINT ["bash"]

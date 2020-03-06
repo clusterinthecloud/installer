@@ -142,11 +142,11 @@ def run_everything(args):
 
     run_command("gcloud auth login")
 
-    run_command(f"gcloud set project {project}")
+    run_command(f"gcloud config set project {project}")
 
     run_command(f"gcloud services enable compute.googleapis.com "
                                     f"iam.googleapis.com "
-                                    f"cloudresourcemanager.googleapis.com"
+                                    f"cloudresourcemanager.googleapis.com "
                                     f"file.googleapis.com")
 
     citc_name = f"citc-admin-{cluster_name}"
@@ -158,7 +158,7 @@ def run_everything(args):
                                     f"--display-name {citc_name}")
 
     run_command(f"gcloud projects add-iam-policy-binding {project} "
-                f"--member serviceAccount:{citc_name}@${project}.iam.gserviceaccount.com "
+                f"--member serviceAccount:{citc_name}@{project}.iam.gserviceaccount.com "
                 "--role='roles/editor'")
 
     run_command(f"gcloud projects add-iam-policy-binding {project} "
@@ -172,7 +172,7 @@ def run_everything(args):
     #### Should have everything installed here and have sufficient permission to run
     ####
 
-    run_command("ssh-keygen -t rsa -f ~/.ssh/citc-google -C provisioner -N \"\"")
+    run_command(f"ssh-keygen -t rsa -f {os.environ['HOME']}/.ssh/citc-google -C provisioner -N \"\"")
     run_command("terraform init google")
 
     # Now create the tfvars file
