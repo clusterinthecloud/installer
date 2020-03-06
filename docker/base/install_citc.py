@@ -191,7 +191,7 @@ def run_everything(args):
     user_keyfile = os.path.expanduser(user_pubkey)
 
     if user_pubkey.startswith("http"):
-        import urllib.request;
+        import urllib.request
         s = urllib.request.urlopen(user_pubkey).read().decode()
         user_pubkey = str(s)
 

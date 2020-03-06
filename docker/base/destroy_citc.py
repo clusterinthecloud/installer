@@ -167,11 +167,15 @@ def run_everything(args):
                                         f"file.googleapis.com")
 
     if not has_completed("terraform_destroy"):
-        run_command("terraform destroy")
+        if not dry:
+            os.chdir("citc-terraform")
+            print(os.getcwd())
+
+        run_command("terraform destroy -auto-approve")
 
     if not has_completed("remove_service_account"):
         citc_name = f"citc-admin-{cluster_name}"
-        run_command(f"gcloud iam service-accounts delete "
+        run_command(f"gcloud iam service-accounts delete --quiet "
                     f"{citc_name}@{project}.iam.gserviceaccount.com")
 
     has_completed("everything")
