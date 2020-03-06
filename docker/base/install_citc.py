@@ -339,7 +339,7 @@ def run_everything(args):
         try:
             args = shlex.split(cmd)
             p = subprocess.run(args, capture_output=True)
-            cluster_ip = p.stdout.strip()
+            cluster_ip = p.stdout.decode("utf-8").strip()
         except Exception as e:
             print(f"[ERROR] {e}")
             sys.exit(-1)
