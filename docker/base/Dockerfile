@@ -17,5 +17,6 @@ ENV PATH=/google-cloud-sdk/bin:$PATH
 WORKDIR /root
 
 ADD install_citc.py .
+ADD destroy_citc.py .
 
 ENTRYPOINT ["bash"]
