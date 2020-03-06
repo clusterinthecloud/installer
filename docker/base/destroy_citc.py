@@ -171,7 +171,8 @@ def run_everything(args):
             os.chdir("citc-terraform")
             print(os.getcwd())
 
-        run_command("terraform destroy -auto-approve")
+        run_command("terraform init google")
+        run_command("terraform destroy -auto-approve google")
 
     if not has_completed("remove_service_account"):
         citc_name = f"citc-admin-{cluster_name}"
