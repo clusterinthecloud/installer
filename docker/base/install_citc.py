@@ -6,10 +6,17 @@ import os
 import shlex
 import subprocess
 
+default_zone = "europe-west2-c"
+default_shape = "n1-standard-1"
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
 parser.add_argument("--json", help="Provide a JSON file containing input parameters")
+parser.add_argument("--zone", help=f"Set the zone in which the cluster will be created (default {default_zone})")
+parser.add_argument("--project", help="Set the project in which the cluster will be created")
+parser.add_argument("--key", help="Your public SSH key (either the key, file containing the key, or URL containing the key")
+parser.add_argument("--shape", help=f"The shape used for the management node (default {default_shape})")
 
 args = parser.parse_args()
 
@@ -17,6 +24,23 @@ if args.dry_run:
     dry = True
 else:
     dry = False
+
+last_stage = None
+
+def has_completed(stage):
+    global last_stage
+
+    filename = f"completed_{stage.replace(" ","_")}.txt"
+
+    if os.path.exists(filename):
+        return True
+
+    if last_stage:
+        with open(filename, "w") as FILE:
+            FILE.write("completed\n")
+
+    last_stage = stage
+    return False
 
 def run_command(cmd):
     if dry:
@@ -32,8 +56,12 @@ def run_command(cmd):
         print(f"[ERROR] {e}")
         sys.exit(-1)
 
-
 def run_everything(args):
+    project = None
+    zone = None
+    user_pubkey = None
+    login_shape = None
+
     if args.json:
         import json
         try:
@@ -43,30 +71,51 @@ def run_everything(args):
             print(f"Failed to read parameters from json file '{args.json}': {e}")
             sys.exit(-1)
 
-        try:
+        if "zone" in data:
             zone = str(data["zone"])
+        else:
+            zone = default_zone
+
+        if "project" in data:
             project = str(data["project"])
+
+        if "pubkey" in data:
             user_pubkey = str(data["pubkey"])
-        except Exception as e:
-            print(f"Failed to extract necessary parameters from json: {e}")
-            sys.exit(-1)
+
+        if "shape" in data:
+            login_shape = str(data["shape"])
+        else:
+            login_shape = default_shape
     else:
-        # get input from the user
-        project = None
+        if args.zone:
+            zone = str(args.zone)
 
-        while not project:
-            project = input("Which google project should the cluster be created in? ")
+        if args.project:
+            project = str(args.project)
 
-        default_zone = "europe-west2-c"
+        if args.key:
+            user_pubkey = str(args.key)
+
+        if args.shape:
+            login_shape = str(args.shape)
+
+    while not project:
+        project = input("Which google project should the cluster be created in? ")
+
+    while not zone:
         zone = input(f"Which zone should the cluster run in [{default_zone}]? ")
 
         if not zone:
             zone = default_zone
 
-        user_pubkey = None
+    while not login_shape:
+        login_shape = input(f"What shape should be used for the login node [{default_shape}]? ")
 
-        while not user_pubkey:
-            user_pubkey = input("Please copy here you public SSH key: ")
+        if not login_shape:
+            login_shape = default_shape
+
+    while not user_pubkey:
+        user_pubkey = input("Please copy here you public SSH key: ")
 
     region = "-".join(zone.split("-")[0:-1])
 
