@@ -359,8 +359,11 @@ def run_everything(args):
         else:
             FILE.close()
 
+    scp_options = "-o StrictHostKeyChecking=no -i ~/.ssh/citc-google"
+
     if not has_completed("upload_pubkey"):
-        run_command(f"scp citc-admin.pub provisioner@{cluster_ip}:")
+        run_command(f"scp {scp_options} citc-admin.pub "
+                    f"provisioner@{cluster_ip}:")
 
     if not has_completed("upload_terraform_files"):
         if not dry:
@@ -368,7 +371,8 @@ def run_everything(args):
 
         run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform* "
                     "citc-terraform/checkpoint-input.json")
-        run_command(f"scp terraform.tgz provisioner@{cluster_ip}:")
+        run_command(f"scp {scp_options} terraform.tgz "
+                    f"provisioner@{cluster_ip}:")
 
     print("\n\nYour Cluster-in-the-Cloud has now been created :-)")
     print("Proceed to the next stage. Connect to the cluster")
