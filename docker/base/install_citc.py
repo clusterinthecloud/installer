@@ -322,7 +322,8 @@ def run_everything(args):
         if not dry:
             os.chdir("..")
 
-        run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform*")
+        run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform* "
+                    "citc-terraform/checkpoint-input.json")
         run_command(f"scp terraform.tgz provisioner@{cluster_ip}:")
 
     print("\n\nYour Cluster-in-the-Cloud has now been created :-)")
