@@ -234,6 +234,7 @@ def run_everything(args):
     if os.path.exists("citc-terraform"):
         if not dry:
             os.chdir("citc-terraform")
+            print(os.getcwd())
 
         run_command("git pull")
     else:
@@ -368,6 +369,7 @@ def run_everything(args):
     if not has_completed("upload_terraform_files"):
         if not dry:
             os.chdir("..")
+            print(os.getpwd())
 
         run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform* "
                     "citc-terraform/checkpoint-input.json")
