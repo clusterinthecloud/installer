@@ -15,6 +15,9 @@ parser.add_argument("--host",
 parser.add_argument("--dry-run",
                     help="Perform a dry run", action="store_true")
 
+parser.add_argument("--json", help="Provide a JSON file containing input "
+                                   "parameters")
+
 args = parser.parse_args()
 
 if args.dry_run:
@@ -62,8 +65,20 @@ def run_command(cmd):
 def run_everything(args):
     hostname = None
 
-    if args.hostname:
-        hostname = str(args.hostname)
+    if args.host:
+        hostname = str(args.host)
+
+    elif args.json:
+        try:
+            with open(args.json, "r") as FILE:
+                data = json.load(FILE)
+        except Exception as e:
+            print(f"Failed to read parameters from json file "
+                  f"'{args.json}': {e}")
+            sys.exit(-1)
+
+        if "host" in data:
+            hostname = str(data["host"])
 
     while not hostname:
         hostname = input("What is the hostname or IP address of the login "
@@ -110,7 +125,8 @@ def run_everything(args):
 
     if not has_completed("remove_service_account"):
         citc_name = f"citc-admin-{cluster_name}"
-        run_command(f"gcloud iam service-accounts delete {citc_name}")
+        run_command(f"gcloud iam service-accounts delete "
+                    f"{citc_name}@{project}.iam.gserviceaccount.com")
 
     has_completed("everything")
 
