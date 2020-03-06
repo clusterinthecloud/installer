@@ -243,6 +243,7 @@ def run_everything(args):
 
         if not dry:
             os.chdir("citc-terraform")
+            print(os.getcwd())
 
     if not has_completed("gcloud_login"):
         run_command("gcloud auth login")
@@ -369,10 +370,12 @@ def run_everything(args):
     if not has_completed("upload_terraform_files"):
         if not dry:
             os.chdir("..")
-            print(os.getpwd())
+            print(os.getcwd())
 
-        run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform* "
-                    "citc-terraform/checkpoint-input.json")
+        run_command("tar -zcvf terraform.tgz .ssh "
+                    "citc-terraform/terraform.tfstate "
+                    "citc-terraform/terraform.tfvars "
+                    "checkpoint_input.json")
         run_command(f"scp {scp_options} terraform.tgz "
                     f"provisioner@{cluster_ip}:")
 
