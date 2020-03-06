@@ -9,6 +9,7 @@ import subprocess
 
 default_zone = "europe-west2-c"
 default_shape = "n1-standard-1"
+default_branch = "master"
 
 parser = argparse.ArgumentParser()
 
@@ -25,6 +26,11 @@ parser.add_argument("--key", help="Your public SSH key (either the key, file "
                                   "the key)")
 parser.add_argument("--shape", help=f"The shape used for the management "
                                     f"node (default {default_shape})")
+
+parser.add_argument("--branch", help=f"The branch used for CitC "
+                                     f"(default {default_branch})")
+
+parser.add_argument("--ansible-branch", help="The ansible branch to use")
 
 args = parser.parse_args()
 
@@ -77,6 +83,8 @@ def run_everything(args):
     user_pubkey = None
     login_shape = None
     cluster_name = None
+    branch = None
+    ansible_branch = None
 
     checkpoint_file = "checkpoint_input.json"
 
@@ -90,6 +98,12 @@ def run_everything(args):
             user_pubkey = str(data["pubkey"])
             login_shape = str(data["shape"])
             cluster_name = str(data["name"])
+
+            if "branch" in data:
+                branch = str(data["branch"])
+
+            if "ansible_branch" in data:
+                ansible_branch = str(data["ansible_branch"])
         except Exception as e:
             print(f"[ERROR] Error reading checkpoint file: {e}")
             print(f"[ERROR] Remove {checkpoint_file}")
@@ -119,6 +133,14 @@ def run_everything(args):
             login_shape = str(data["shape"])
         else:
             login_shape = default_shape
+
+        if "branch" in data:
+            branch = str(data["branch"])
+        else:
+            branch = default_branch
+
+        if "ansible_branch" in data:
+            ansible_branch = str(data["ansible_branch"])
     else:
         if args.zone:
             zone = str(args.zone)
@@ -131,6 +153,12 @@ def run_everything(args):
 
         if args.shape:
             login_shape = str(args.shape)
+
+        if args.branch:
+            branch = str(args.branch)
+
+        if args.ansible_branch:
+            ansible_branch = str(args.ansible_branch)
 
     while not project:
         project = input("Which google project should the cluster be "
@@ -152,6 +180,13 @@ def run_everything(args):
 
     while not user_pubkey:
         user_pubkey = input("Please copy here you public SSH key: ")
+
+    while not branch:
+        branch = input(f"Which branch should be used of CitC "
+                       f"[{default_branch}]? ")
+
+        if not branch:
+            branch = default_branch
 
     user_keyfile = os.path.expanduser(user_pubkey)
 
@@ -177,7 +212,11 @@ def run_everything(args):
                     "project": project,
                     "pubkey": user_pubkey,
                     "shape": login_shape,
-                    "name": cluster_name}
+                    "name": cluster_name,
+                    "branch": branch}
+
+            if ansible_branch:
+                data["ansible_branch"] = ansible_branch
 
             FILE.write(json.dumps(data))
 
@@ -198,7 +237,8 @@ def run_everything(args):
 
         run_command("git pull")
     else:
-        run_command("git clone https://github.com/ACRC/citc-terraform.git")
+        run_command(f"git clone --branch {branch} "
+                    f"https://github.com/ACRC/citc-terraform.git")
 
         if not dry:
             os.chdir("citc-terraform")
@@ -268,6 +308,10 @@ def run_everything(args):
         FILE.write(f"credentials      = \"citc-terraform-credentials.json\"\n")
         FILE.write(f"private_key_path = \"~/.ssh/citc-google\"\n")
         FILE.write(f"public_key_path  = \"~/.ssh/citc-google.pub\"\n")
+
+        if ansible_branch:
+            FILE.write(f"ansible_branch   = \"{ansible_branch}\"\n")
+
         FILE.write(f"cluster_id       = \"{cluster_name}\"\n")
 
         if dry:
