@@ -294,8 +294,8 @@ def run_everything(args):
         print(f"[EXECUTE] {cmd}")
         try:
             args = shlex.split(cmd)
-            p = subprocess.Popen(args)
-            cluster_ip = p.readlines()[0].strip()
+            p = subprocess.run(args)
+            cluster_ip = p.stdout.strip()
         except Exception as e:
             print(f"[ERROR] {e}")
             sys.exit(-1)
@@ -319,7 +319,11 @@ def run_everything(args):
         run_command(f"scp citc-admin.pub provisioner@{cluster_ip}:")
 
     if not has_completed("upload_terraform_files"):
-        run_command(f"scp terraform.tfstate.vars provisioner@{cluster_ip}:")
+        if not dry:
+            os.chdir("..")
+
+        run_command("tar -zcvf terraform.tgz .ssh citc-terraform/terraform*")
+        run_command(f"scp terraform.tgz provisioner@{cluster_ip}:")
 
     print("\n\nYour Cluster-in-the-Cloud has now been created :-)")
     print("Proceed to the next stage. Connect to the cluster")
