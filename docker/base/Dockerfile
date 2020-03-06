@@ -15,6 +15,7 @@ RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 ENV PATH=/google-cloud-sdk/bin:$PATH
 
 WORKDIR /root
+RUN mkdir .ssh
 
 ADD install_citc.py .
 ADD destroy_citc.py .

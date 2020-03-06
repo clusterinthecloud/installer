@@ -373,8 +373,7 @@ def run_everything(args):
             print(os.getcwd())
 
         run_command("tar -zcvf terraform.tgz .ssh "
-                    "citc-terraform/terraform.tfstate "
-                    "citc-terraform/terraform.tfvars "
+                    "citc-terraform "
                     "checkpoint_input.json")
         run_command(f"scp {scp_options} terraform.tgz "
                     f"provisioner@{cluster_ip}:")

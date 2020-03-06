@@ -6,12 +6,18 @@ import os
 import shlex
 import subprocess
 
+default_zone = "europe-west2-c"
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--host",
                     help="The hostname or IP address of the login node "
                          "of the cluster you want to destroy")
-
+parser.add_argument("--zone", help=f"Set the zone in which the cluster will "
+                                   f"be created (default {default_zone})")
+parser.add_argument("--project", help="Set the project in which the cluster "
+                                      "will be created")
+parser.add_argument("--name", help="The name of the cluster")
 parser.add_argument("--dry-run",
                     help="Perform a dry run", action="store_true")
 
@@ -64,11 +70,23 @@ def run_command(cmd):
 
 def run_everything(args):
     hostname = None
+    cluster_name = None
+    project = None
+    zone = None
 
     if args.host:
         hostname = str(args.host)
 
-    elif args.json:
+    if args.project:
+        project = str(args.project)
+
+    if args.zone:
+        zone = str(args.zone)
+
+    if args.name:
+        cluster_name = str(args.name)
+
+    if args.json:
         try:
             with open(args.json, "r") as FILE:
                 data = json.load(FILE)
@@ -80,9 +98,33 @@ def run_everything(args):
         if "host" in data:
             hostname = str(data["host"])
 
+        if "project" in data:
+            project = str(data["project"])
+
+        if "zone" in data:
+            zone = str(data["zone"])
+
+        if "name" in data:
+            cluster_name = str(data["name"])
+
     while not hostname:
         hostname = input("What is the hostname or IP address of the login "
                          "node? ")
+
+    while not cluster_name:
+        cluster_name = input("What is the name of the CitC cluster? ")
+
+    while not project:
+        project = input("Which google project was the cluster "
+                        "created in? ")
+
+    while not zone:
+        zone = input(f"What zone was the cluster created in "
+                     f"[{default_zone}]? ")
+
+        if not zone:
+            zone = default_zone
+
 
     print(f"\nDestroying the CitC with login node {hostname}")
 
@@ -93,7 +135,11 @@ def run_everything(args):
         run_command("gcloud auth login")
 
     if not has_completed("download_terraform"):
-        run_command(f"gcloud compute scp provisioner@{hostname}:terraform.tgz "
+        scp_options = f"--strict-host-key-checking=no --quiet --zone={zone}"
+
+        run_command(f"gcloud config set project {project}")
+        run_command(f"gcloud compute scp {scp_options} "
+                    f"provisioner@mgmt-{cluster_name}:terraform.tgz "
                     f"./terraform.tgz")
 
     if not has_completed("untar_files"):
