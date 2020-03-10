@@ -1,6 +1,6 @@
 FROM hashicorp/terraform:0.12.21
 
-ARG GCLOUD=272.0.0
+ARG GCLOUD=284.0.0
 
 RUN apk add --update bash openssh curl python3
 RUN pip3 install petname

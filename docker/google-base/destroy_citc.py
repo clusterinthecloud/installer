@@ -179,6 +179,14 @@ def run_everything(args):
         run_command(f"gcloud iam service-accounts delete --quiet "
                     f"{citc_name}@{project}.iam.gserviceaccount.com")
 
+    if not has_completed("remove_images"):
+        citc_name = f"citc-slurm-compute-{cluster_name}"
+        run_command(f"gcloud compute images list --format=\"table[no-heading](name)\" " 
+                    f"--filter=\"family={citc_name}\" | xargs gcloud compute images delete -q")
+
+
+                
+
     has_completed("everything")
 
     print("\n\nYour Cluster-in-the-Cloud has now been deleted :-(\n")
