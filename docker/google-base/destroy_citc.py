@@ -181,8 +181,8 @@ def run_everything(args):
 
     if not has_completed("remove_images"):
         citc_name = f"citc-slurm-compute-{cluster_name}"
-        run_command(f"gcloud compute images list --format=\"table[no-heading](name)\" " 
-                    f"--filter=\"family={citc_name}\" | xargs gcloud compute images delete -q")
+        run_command(f"gcloud compute images list --format \"table[no-heading](name)\" " 
+                    f"--filter \"family:{citc_name}\" | xargs gcloud compute images delete -q")
 
 
                 
