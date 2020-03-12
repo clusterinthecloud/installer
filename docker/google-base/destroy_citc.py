@@ -180,13 +180,19 @@ def run_everything(args):
                     f"{citc_name}@{project}.iam.gserviceaccount.com")
 
     if not has_completed("remove_images"):
-        citc_name = f"citc-slurm-compute-{cluster_name}"
-        run_command(f"gcloud compute images list --format \"table[no-heading](name)\" " 
-                    f"--filter \"family:{citc_name}\" | xargs gcloud compute images delete -q")
-
-
+        citc_family_name = f"citc-slurm-compute-{cluster_name}"
+        get_images = f"gcloud compute images list --format \"table[no-heading](name)\" --filter \"family={citc_family_name}\""
                 
-
+        args = shlex.split(get_images)
+        p1 = subprocess.Popen(args, stdout=subprocess.PIPE)    
+        delete_images = f"xargs gcloud compute images delete -q" 
+        args = shlex.split(delete_images)
+        p2 = subprocess.Popen(args, stdin=p1.stdout, stdout=subprocess.PIPE)
+        p1.stdout.close()
+        print(f"[EXECUTE] {get_images} | {delete_images}")
+        output = p2.communicate()[0]
+        print(f"output {output}")
+            
     has_completed("everything")
 
     print("\n\nYour Cluster-in-the-Cloud has now been deleted :-(\n")
