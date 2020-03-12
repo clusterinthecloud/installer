@@ -191,7 +191,6 @@ def run_everything(args):
         p1.stdout.close()
         print(f"[EXECUTE] {get_images} | {delete_images}")
         output = p2.communicate()[0]
-        print(f"output {output}")
             
     has_completed("everything")
 
