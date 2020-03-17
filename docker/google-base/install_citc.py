@@ -245,11 +245,11 @@ def run_everything(args):
             os.chdir("citc-terraform")
             print(os.getcwd())
 
-    if not has_completed("gcloud_login"):
-        run_command("gcloud auth login")
-
     if not has_completed("gcloud_set_project"):
         run_command(f"gcloud config set project {project}")
+
+    if not has_completed("gcloud_login"):
+        run_command("gcloud auth login")
 
     if not has_completed("gcloud_enable_services"):
         run_command(f"gcloud services enable compute.googleapis.com "
