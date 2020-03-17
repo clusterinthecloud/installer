@@ -131,6 +131,9 @@ def run_everything(args):
     if dry:
         print("*** DRY RUN ***\n\n")
 
+    if not has_completed("gcloud_set_project"):
+        run_command(f"gcloud config set project {project}")
+
     if not has_completed("gcloud_login"):
         run_command("gcloud auth login")
 
@@ -156,9 +159,6 @@ def run_everything(args):
         project = str(data["project"])
 
     print(f"Destroying the cluster called {cluster_name} in project {project}")
-
-    if not has_completed("gcloud_set_project"):
-        run_command(f"gcloud config set project {project}")
 
     if not has_completed("gcloud_enable_services"):
         run_command(f"gcloud services enable compute.googleapis.com "
