@@ -114,6 +114,14 @@ def run_everything(args):
     while not cluster_name:
         cluster_name = input("What is the name of the CitC cluster? ")
 
+    if "CLOUDSDK_CONFIG" in os.environ:
+        project = subprocess.run(["gcloud", "config", "get-value", "core/project"], capture_output=True).stdout.decode().strip()
+        if project == "(unset)":
+            project = None
+        zone = subprocess.run(["gcloud", "config", "get-value", "compute/zone"], capture_output=True).stdout.decode().strip()
+        if zone == "(unset)":
+            zone = None
+
     while not project:
         project = input("Which google project was the cluster "
                         "created in? ")
@@ -134,8 +142,9 @@ def run_everything(args):
     if not has_completed("gcloud_set_project"):
         run_command(f"gcloud config set project {project}")
 
-    if not has_completed("gcloud_login"):
-        run_command("gcloud auth login")
+    if not subprocess.run(["gcloud", "auth", "list", "--filter=status:ACTIVE", "--format=value(account)"], capture_output=True).stdout.decode().strip():
+        if not has_completed("gcloud_login"):
+            run_command("gcloud auth login")
 
     if not has_completed("download_terraform"):
         scp_options = f"--strict-host-key-checking=no --quiet --zone={zone}"
