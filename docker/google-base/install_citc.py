@@ -160,6 +160,14 @@ def run_everything(args):
         if args.ansible_branch:
             ansible_branch = str(args.ansible_branch)
 
+    if "CLOUDSDK_CONFIG" in os.environ:
+        project = subprocess.run(["gcloud", "config", "get-value", "core/project"], capture_output=True).stdout.decode().strip()
+        if project == "(unset)":
+            project = None
+        zone = subprocess.run(["gcloud", "config", "get-value", "compute/zone"], capture_output=True).stdout.decode().strip()
+        if zone == "(unset)":
+            zone = None
+
     while not project:
         project = input("Which google project should the cluster be "
                         "created in? ")
@@ -248,8 +256,9 @@ def run_everything(args):
     if not has_completed("gcloud_set_project"):
         run_command(f"gcloud config set project {project}")
 
-    if not has_completed("gcloud_login"):
-        run_command("gcloud auth login")
+    if not subprocess.run(["gcloud", "auth", "list", "--filter=status:ACTIVE", "--format=value(account)"], capture_output=True).stdout.decode().strip():
+        if not has_completed("gcloud_login"):
+            run_command("gcloud auth login")
 
     if not has_completed("gcloud_enable_services"):
         run_command(f"gcloud services enable compute.googleapis.com "
