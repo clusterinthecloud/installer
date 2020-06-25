@@ -2,11 +2,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+if command -v podman; then
+	DOCKER=podman
+else
+	DOCKER=docker
+fi
+
 cd google-base
-docker build -t clusterinthecloud/google-base:latest .
+$DOCKER build -t clusterinthecloud/google-base:latest .
 
 cd ../google-install
-docker build -t clusterinthecloud/google-install:latest .
+$DOCKER build -t clusterinthecloud/google-install:latest .
 
 cd ../google-destroy
-docker build -t clusterinthecloud/google-destroy:latest .
+$DOCKER build -t clusterinthecloud/google-destroy:latest .
