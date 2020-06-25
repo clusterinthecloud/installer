@@ -239,18 +239,18 @@ def run_everything(args):
     if dry:
         print("*** DRY RUN ***\n\n")
 
-    if os.path.exists("citc-terraform"):
+    if os.path.exists("terraform"):
         if not dry:
-            os.chdir("citc-terraform")
+            os.chdir("terraform")
             print(os.getcwd())
 
         run_command("git pull")
     else:
         run_command(f"git clone --branch {branch} "
-                    f"https://github.com/ACRC/citc-terraform.git")
+                    f"https://github.com/clusterinthecloud/terraform.git")
 
         if not dry:
-            os.chdir("citc-terraform")
+            os.chdir("terraform")
             print(os.getcwd())
 
     if not has_completed("gcloud_set_project"):
@@ -382,7 +382,7 @@ def run_everything(args):
             print(os.getcwd())
 
         run_command("tar -zcvf terraform.tgz .ssh "
-                    "citc-terraform "
+                    "terraform "
                     "checkpoint_input.json")
         run_command(f"scp {scp_options} terraform.tgz "
                     f"provisioner@{cluster_ip}:")

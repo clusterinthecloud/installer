@@ -177,7 +177,7 @@ def run_everything(args):
 
     if not has_completed("terraform_destroy"):
         if not dry:
-            os.chdir("citc-terraform")
+            os.chdir("terraform")
             print(os.getcwd())
 
         run_command("terraform init google")
