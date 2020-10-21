@@ -11,7 +11,8 @@ except ImportError:
 from zipfile import ZipFile
 
 def main():
-    print("Python version: ", sys.version)
+    csp = sys.argv[1]
+
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
     ZipFile(tf_repo_zip).extractall()
 
@@ -31,7 +32,9 @@ def main():
     ZipFile(tf_zip).extractall()
     os.chmod("terraform", stat.S_IRWXU)
 
-    check_call(["./terraform", "init", "terraform-master/aws"])
+    check_call(["./terraform", "init", "terraform-master/{}".format(csp)])
+    check_call(["./terraform", "validate", "terraform-master/{}".format(csp)])
+
 
 if __name__ == "__main__":
     main()

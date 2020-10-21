@@ -10,7 +10,8 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        python-version: [2.7, 3.6, 3.9]
+        python-version: [2.7, 3.6]
+        csp: [aws, google, oracle]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
@@ -19,4 +20,4 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Dry run
-        run: python install-citc.py
+        run: python install-citc.py ${{ matrix.csp }}
