@@ -11,6 +11,7 @@ except ImportError:
 from zipfile import ZipFile
 
 def main():
+    print("Python version: ", sys.version)
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
     ZipFile(tf_repo_zip).extractall()
 
