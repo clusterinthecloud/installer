@@ -5,8 +5,8 @@ import os
 import os.path
 import stat
 import sys
-from shutil import copyfile
-from subprocess import check_call
+import shutil
+from subprocess import check_call, check_output
 try:
     from urllib.request import urlretrieve
 except ImportError:
@@ -21,7 +21,9 @@ def main():
 
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
     ZipFile(tf_repo_zip).extractall()
-    os.chdir("terraform-master")
+    shutil.rmtree("citc-terraform")
+    os.rename("terraform-master", "citc-terraform")
+    os.chdir("citc-terraform")
 
     if sys.platform.startswith("linux"):
         tf_platform = "linux_amd64"
