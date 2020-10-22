@@ -52,6 +52,18 @@ def main():
     if not args.dry_run:
         check_call(["./terraform", "apply", args.csp])
 
+    ip = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip()
+
+    print("")
+    print("#"*80)
+    print("")
+    print("The file 'citc-terraform/citc-key' will allow you to log into the new cluster")
+    print("Make sure you save this key as it is needed to destroy the cluster later.")
+
+    print("The IP address of the cluster is {}".format(ip))
+    print("Connect with:")
+    print("  ssh -i {ssh_id} citc@{ip}".format(ssh_id="citc-terraform/citc-key", ip=ip))
+
 
 def config_file(csp):
     with open(os.path.join(csp, "terraform.tfvars.example")) as f:
