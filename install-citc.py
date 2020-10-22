@@ -21,7 +21,7 @@ def main():
 
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
     ZipFile(tf_repo_zip).extractall()
-    shutil.rmtree("citc-terraform")
+    shutil.rmtree("citc-terraform", ignore_errors=True)
     os.rename("terraform-master", "citc-terraform")
     os.chdir("citc-terraform")
 
