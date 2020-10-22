@@ -17,6 +17,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("csp", help="Which cloud provider to install into")
     parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
+    parser.add_argument("--region", help="AWS region")
+    parser.add_argument("--availability_zone", help="AWS availability zone")
     args = parser.parse_args()
 
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
@@ -47,12 +49,18 @@ def main():
     check_call(["./terraform", "init", args.csp])
     check_call(["./terraform", "validate", args.csp])
 
-    config_file(args.csp)
+    config_file(args.csp, args)
 
     if not args.dry_run:
-        check_call(["./terraform", "apply", args.csp])
+        check_call(["./terraform", "apply", "-auto-approve", args.csp])
 
     ip = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip()
+
+    os.chdir("..")
+
+    tf_zip = shutil.make_archive("citc-terraform", "zip", "citc-terraform")
+    if not args.dry_run:
+        check_call(["scp", "-i", "citc-terraform/citc-key", tf_zip, "citc@{}:.".format(ip)])
 
     print("")
     print("#"*80)
@@ -65,12 +73,12 @@ def main():
     print("  ssh -i {ssh_id} citc@{ip}".format(ssh_id="citc-terraform/citc-key", ip=ip))
 
 
-def config_file(csp):
+def config_file(csp, args):
     with open(os.path.join(csp, "terraform.tfvars.example")) as f:
         config = f.read()
 
     if csp == "aws":
-        config = aws_config_file(config)
+        config = aws_config_file(config, args)
     else:
         raise NotImplementedError("Other providers are not supported yet")
 
@@ -81,11 +89,15 @@ def config_file(csp):
         f.write(config)
 
 
-def aws_config_file(config):
+def aws_config_file(config, args):
     config = config.replace("~/.ssh/aws-key", "citc-key")
     with open("citc-key.pub") as pub_key:
         pub_key_text = pub_key.read().strip()
     config = config.replace("admin_public_keys = <<EOF", "admin_public_keys = <<EOF\n" + pub_key_text)
+    if args.region:
+        config += '\nregion = "{}"'.format(args.region)
+    if args.availability_zone:
+        config += '\navailability_zone = "{}"'.format(args.availability_zone)
     return config
 
 
