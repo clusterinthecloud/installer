@@ -68,15 +68,15 @@ def main():
     new_dir_name = "citc-terraform-{}".format(cluster_id)
     os.rename("citc-terraform", new_dir_name)
 
+    key_path = "{}/citc-key".format(new_dir_name)
+
     shutil.rmtree(os.path.join(new_dir_name, ".terraform"))
     tf_zip = shutil.make_archive("citc-terraform", "zip", ".", new_dir_name)
     if not args.dry_run:
-        while call(["scp", "-i", "citc-terraform/citc-key", "-o", "StrictHostKeyChecking no", tf_zip, "citc@{}:.".format(ip)]) != 0:
+        while call(["scp", "-i", key_path, "-o", "StrictHostKeyChecking no", tf_zip, "citc@{}:.".format(ip)]) != 0:
             print("Trying to upload Terraform state...")
             time.sleep(10)
     os.remove(tf_zip)
-
-    key_path = "{}/citc-key".format(new_dir_name)
 
     print("")
     print("#"*80)
