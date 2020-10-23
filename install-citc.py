@@ -6,7 +6,8 @@ import os.path
 import stat
 import sys
 import shutil
-from subprocess import check_call, check_output
+import time
+from subprocess import call, check_call, check_output
 try:
     from urllib.request import urlretrieve
 except ImportError:
@@ -67,9 +68,12 @@ def main():
     new_dir_name = "citc-terraform-{}".format(cluster_id)
     os.rename("citc-terraform", new_dir_name)
 
+    shutil.rmtree(os.path.join(new_dir_name, ".terraform"))
     tf_zip = shutil.make_archive("citc-terraform", "zip", ".", new_dir_name)
     if not args.dry_run:
-        check_call(["scp", "-i", "citc-terraform/citc-key", tf_zip, "citc@{}:.".format(ip)])
+        while call(["scp", "-i", "citc-terraform/citc-key", "-o", "StrictHostKeyChecking no", tf_zip, "citc@{}:.".format(ip)]) != 0:
+            print("Trying to upload Terraform state...")
+            time.sleep(10)
     os.remove(tf_zip)
 
     key_path = "{}/citc-key".format(new_dir_name)

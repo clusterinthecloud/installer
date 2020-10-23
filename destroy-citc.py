@@ -30,12 +30,13 @@ def main():
     # Shut down any running compute nodes and delete associated DNS entries
     if not args.dry_run:
         try:
-            check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes"])
+            check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes --force"])
         except CalledProcessError:
             print("/usr/local/bin/kill_all_nodes failed to run. You may have lingering compute nodes. You must kill these manually.")
 
     os.chdir(dir_name)
 
+    os.chmod("terraform", stat.S_IRWXU)
     check_call(["./terraform", "init", args.csp])
 
     if not args.dry_run:
