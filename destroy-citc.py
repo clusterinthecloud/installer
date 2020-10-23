@@ -6,7 +6,7 @@ import os.path
 import stat
 import sys
 import shutil
-from subprocess import check_call, check_output
+from subprocess import check_call, check_output, CalledProcessError
 try:
     from urllib.request import urlretrieve
 except ImportError:
@@ -27,18 +27,27 @@ def main():
 
     # Shut down any running packer builders
     if not args.dry_run:
-        check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_packer"])
+        pass#check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_packer"])i
 
     # Shut down any running compute nodes and delete associated DNS entries
     if not args.dry_run:
-        check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes"])
+        try:
+            check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes"])
+        except CalledProcessError:
+            print("/usr/local/bin/kill_all_nodes failed to run. You may have lingering compute nodes. You must killi these manually.")
 
     os.chdir("downloaded-citc-terraform")
 
     check_call(["./terraform", "init", args.csp])
 
     if not args.dry_run:
-        check_call(["./terraform", "destroy", "-auto-approve", args.csp])
+        try:
+            check_call(["./terraform", "destroy", "-auto-approve", args.csp])
+        except CalledProcessError:
+            print("Terraform destroy failed. Try again with:")
+            print("  cd downloaded-citc-terraform")
+            print("  ./terraform destroy {}".format(args.csp))
+            print("You may need to manually clean up any remaining running instances or DNS entries")
 
 
 if __name__ == "__main__":
