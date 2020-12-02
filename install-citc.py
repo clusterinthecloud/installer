@@ -22,6 +22,8 @@ def main():
     parser.add_argument("--availability_zone", help="AWS availability zone")
     args = parser.parse_args()
 
+    print("Installing Cluster in the Cloud on AWS")
+
     #Download the CitC Terraform repo
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
     ZipFile(tf_repo_zip).extractall()
