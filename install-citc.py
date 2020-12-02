@@ -16,7 +16,7 @@ from zipfile import ZipFile
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("csp", help="Which cloud provider to install into")
+    parser.add_argument("csp", choices=["aws"], help="Which cloud provider to install into")
     parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
     parser.add_argument("--region", help="AWS region")
     parser.add_argument("--availability_zone", help="AWS availability zone")
