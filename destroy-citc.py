@@ -15,6 +15,13 @@ except ImportError:
     from urllib import urlretrieve
 from zipfile import ZipFile
 
+try:
+    # Python 2/3 compatibility
+    input = raw_input
+except NameError:
+    pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("csp", help="Which cloud provider to install into")
@@ -22,6 +29,12 @@ def main():
     parser.add_argument("key", help="Path of the SSH key from cluster creation")
     parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
     args = parser.parse_args()
+
+    # Check that the user really meant it
+    if not args.dry_run:
+        proceed = input("Are you sure you want to destroy the cluster at {}? [y/N]: ".format(args.ip))
+        if proceed.lower() != "y":
+            exit(1)
 
     tf_zip_filename = "citc-terraform.zip"
     check_call(["scp", "-i", args.key, "citc@{}:{}".format(args.ip, tf_zip_filename), "."])
