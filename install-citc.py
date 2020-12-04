@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
     parser.add_argument("--region", help="AWS region")
     parser.add_argument("--availability_zone", help="AWS availability zone")
+    parser.add_argument("--profile", help="AWS credentials profile")
     args = parser.parse_args()
 
     print("Installing Cluster in the Cloud on AWS")
@@ -116,6 +117,8 @@ def aws_config_file(config, args):
         config += '\nregion = "{}"'.format(args.region)
     if args.availability_zone:
         config += '\navailability_zone = "{}"'.format(args.availability_zone)
+    if args.profile:
+        config += '\nprofile = "{}"'.format(args.profile)
     return config
 
 
