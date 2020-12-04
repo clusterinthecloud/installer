@@ -26,7 +26,8 @@ def main():
     print("Installing Cluster in the Cloud on AWS")
 
     #Download the CitC Terraform repo
-    tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/master.zip")
+    tf_repo_branch = "master"
+    tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/{branch}.zip".format(branch=tf_repo_branch))
     ZipFile(tf_repo_zip).extractall()
     shutil.rmtree("citc-terraform", ignore_errors=True)
     os.rename("terraform-master", "citc-terraform")
