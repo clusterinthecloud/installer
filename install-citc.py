@@ -39,8 +39,7 @@ def main():
         check_output(check_command, stderr=subprocess.STDOUT)
     except CalledProcessError as e:
         if "RequestExpired" in e.output.decode():
-            print("AWS credentials have expired:", e.output.decode().strip())
-            exit(1)
+            print("AWS credentials have expired:")
         if "DryRunOperation" not in e.output.decode():
             print(e.output.decode())
             exit(1)
