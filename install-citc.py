@@ -22,6 +22,10 @@ def main():
     parser.add_argument("--region", help="AWS region")
     parser.add_argument("--availability_zone", help="AWS availability zone")
     parser.add_argument("--profile", help="AWS credentials profile")
+    parser.add_argument("--terraform-repo", default="clusterinthecloud/terraform", help="CitC Terraform repo to use")
+    parser.add_argument("--terraform-branch", default="tf_0_13_aws", help="CitC Terraform branch to use")
+    parser.add_argument("--ansible-repo", help="CitC Ansible repo to use")
+    parser.add_argument("--ansible-branch", help="CitC Ansible branch to use")
     args = parser.parse_args()
 
     print("Installing Cluster in the Cloud on AWS")
@@ -34,12 +38,11 @@ def main():
             exit(1)
 
     #Download the CitC Terraform repo
-    tf_repo_branch = "tf_0_13_aws"
     print("Downloading CitC Terraform configuration")
-    tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/{branch}.zip".format(branch=tf_repo_branch))
+    tf_repo_zip, _ = urlretrieve("https://github.com/{repo}/archive/{branch}.zip".format(repo=args.terraform_repo, branch=args.terraform_branch))
     ZipFile(tf_repo_zip).extractall()
     shutil.rmtree("citc-terraform", ignore_errors=True)
-    os.rename("terraform-{branch}".format(branch=tf_repo_branch), "citc-terraform")
+    os.rename("terraform-{branch}".format(branch=args.terraform_branch), "citc-terraform")
     os.chdir("citc-terraform")
 
     # Download Terraform binary
@@ -112,8 +115,10 @@ def config_file(csp, args):
     else:
         raise NotImplementedError("Other providers are not supported yet")
 
-    if "ANSIBLE_BRANCH" in os.environ:
-        config = config + '\nansible_branch = "{}"'.format(os.environ["ANSIBLE_BRANCH"])
+    if args.ansible_repo:
+        config = config + '\nansible_repo = "{}"'.format(args.ansible_repo)
+    if args.ansible_branch:
+        config = config + '\nansible_branch = "{}"'.format(args.ansible_branch)
 
     with open("terraform.tfvars", "w") as f:
         f.write(config)
