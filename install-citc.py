@@ -34,11 +34,12 @@ def main():
             exit(1)
 
     #Download the CitC Terraform repo
-    tf_repo_branch = "master"
+    tf_repo_branch = "tf_0_13_aws"
+    print("Downloading CitC Terraform configuration")
     tf_repo_zip, _ = urlretrieve("https://github.com/clusterinthecloud/terraform/archive/{branch}.zip".format(branch=tf_repo_branch))
     ZipFile(tf_repo_zip).extractall()
     shutil.rmtree("citc-terraform", ignore_errors=True)
-    os.rename("terraform-master", "citc-terraform")
+    os.rename("terraform-{branch}".format(branch=tf_repo_branch), "citc-terraform")
     os.chdir("citc-terraform")
 
     # Download Terraform binary
@@ -50,9 +51,10 @@ def main():
         raise NotImplementedError("Windows is not supported at the mooment")
     else:
         raise NotImplementedError("Platform is not supported")
-    tf_version = "0.12.29"
+    tf_version = "0.14.0"
     tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
     tf_url = tf_template.format(v=tf_version, p=tf_platform)
+    print("Downloading CitC Terraform binary")
     tf_zip, _ = urlretrieve(tf_url)
     ZipFile(tf_zip).extractall()
     os.chmod("terraform", stat.S_IRWXU)
@@ -73,8 +75,8 @@ def main():
         check_call(["./terraform", "apply", "-auto-approve", args.csp])
 
     # Get the outputs
-    ip = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip()
-    cluster_id = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "cluster_id"]).decode().strip()
+    ip = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
+    cluster_id = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
 
     os.chdir("..")
     new_dir_name = "citc-terraform-{}".format(cluster_id)
