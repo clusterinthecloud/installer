@@ -22,7 +22,7 @@ def main():
     parser.add_argument("--region", help="AWS region")
     parser.add_argument("--availability_zone", help="AWS availability zone")
     parser.add_argument("--profile", help="AWS credentials profile")
-    parser.add_argument("--terraform-repo", default="clusterinthecloud/terraform", help="CitC Terraform repo to use")
+    parser.add_argument("--terraform-repo", default="clusterinthecloud/terraform", help="CitC Terraform GitHub project repo to use")
     parser.add_argument("--terraform-branch", default="tf_0_13_aws", help="CitC Terraform branch to use")
     parser.add_argument("--ansible-repo", help="CitC Ansible repo to use")
     parser.add_argument("--ansible-branch", help="CitC Ansible branch to use")
