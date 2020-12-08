@@ -4,10 +4,11 @@ import argparse
 import os
 import os.path
 import stat
+import subprocess
 import sys
 import shutil
 import time
-from subprocess import call, check_call, check_output
+from subprocess import call, check_call, check_output, CalledProcessError
 try:
     from urllib.request import urlretrieve
 except ImportError:
@@ -24,6 +25,13 @@ def main():
     args = parser.parse_args()
 
     print("Installing Cluster in the Cloud on AWS")
+
+    try:
+        check_output(["aws", "--profile", args.profile, "--dry-run", "ec2", "describe-images", "--region", args.region], stderr=subprocess.STDOUT)
+    except CalledProcessError as e:
+        if "RequestExpired" in e.output.decode():
+            print("AWS credentials have expired")
+            exit(1)
 
     #Download the CitC Terraform repo
     tf_repo_branch = "master"
