@@ -31,7 +31,12 @@ def main():
     print("Installing Cluster in the Cloud on AWS")
 
     try:
-        check_output(["aws", "--profile", args.profile, "--dry-run", "ec2", "describe-images", "--region", args.region], stderr=subprocess.STDOUT)
+        check_command = ["aws", "--dry-run", "ec2", "describe-images"]
+        if args.profile:
+            check_command.extend(["--profile", args.profile])
+        if args.region:
+            check_command.extend(["--region", args.region])
+        check_output(check_command, stderr=subprocess.STDOUT)
     except CalledProcessError as e:
         if "RequestExpired" in e.output.decode():
             print("AWS credentials have expired")
