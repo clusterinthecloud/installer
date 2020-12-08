@@ -98,7 +98,7 @@ def main():
     shutil.rmtree(os.path.join(new_dir_name, ".terraform"))
     tf_zip = shutil.make_archive("citc-terraform", "zip", ".", new_dir_name)
     if not args.dry_run:
-        while call(["scp", "-i", key_path, "-o", "StrictHostKeyChecking no", tf_zip, "citc@{}:.".format(ip)]) != 0:
+        while call(["scp", "-i", key_path, "-o", "StrictHostKeyChecking no", "-o", "IdentitiesOnly=yes", tf_zip, "citc@{}:.".format(ip)]) != 0:
             print("Trying to upload Terraform state...")
             time.sleep(10)
     os.remove(tf_zip)

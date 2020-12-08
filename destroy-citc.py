@@ -38,7 +38,7 @@ def main():
 
     tf_zip_filename = "citc-terraform.zip"
     print("Downloading the Terraform configuration from {}".format(args.ip))
-    check_call(["scp", "-i", args.key, "citc@{}:{}".format(args.ip, tf_zip_filename), "."])
+    check_call(["scp", "-i", args.key, "-o", "IdentitiesOnly=yes", "citc@{}:{}".format(args.ip, tf_zip_filename), "."])
     tf_zip = ZipFile(tf_zip_filename)
     dir_name = tf_zip.namelist()[0]
     tf_zip.extractall()
@@ -47,7 +47,7 @@ def main():
     if not args.dry_run:
         try:
             print("Connecting to the cluster to destroy lingering compute nodes...")
-            check_call(["ssh", "-i", args.key, "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes --force"])
+            check_call(["ssh", "-i", args.key, "-o", "IdentitiesOnly=yes", "citc@{}".format(args.ip), "/usr/local/bin/kill_all_nodes --force"])
         except CalledProcessError:
             print("/usr/local/bin/kill_all_nodes failed to run. You may have lingering compute nodes. You must kill these manually.")
 
