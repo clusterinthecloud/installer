@@ -18,7 +18,7 @@ except ImportError:
 from zipfile import ZipFile
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Install Cluster in the Cloud")
     parser.add_argument("csp", choices=["aws"], help="Which cloud provider to install into")
     parser.add_argument("--dry-run", help="Perform a dry run", action="store_true")
     parser.add_argument("--region", help="AWS region")
