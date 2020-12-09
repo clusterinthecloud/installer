@@ -20,4 +20,4 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Dry run
-        run: python install-citc.py ${{ matrix.csp }} --dry-run
+        run: python install-citc.py ${{ matrix.csp }} --help
