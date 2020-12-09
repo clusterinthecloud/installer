@@ -64,7 +64,7 @@ def main():
     tf_version = "0.14.0"
     tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
     tf_url = tf_template.format(v=tf_version, p=tf_platform)
-    print("Downloading CitC Terraform binary")
+    print("Downloading Terraform binary")
     tf_zip, _ = urlretrieve(tf_url)
     ZipFile(tf_zip).extractall()
     os.chmod("terraform", stat.S_IRWXU)
