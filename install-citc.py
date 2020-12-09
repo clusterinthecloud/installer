@@ -63,7 +63,7 @@ def main():
         raise NotImplementedError("Windows is not supported at the mooment")
     else:
         raise NotImplementedError("Platform is not supported")
-    tf_version = "0.14.0"
+    tf_version = "0.14.2"
     tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
     tf_url = tf_template.format(v=tf_version, p=tf_platform)
     print("Downloading Terraform binary")
