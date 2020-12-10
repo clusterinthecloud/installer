@@ -60,9 +60,9 @@ def main():
     elif sys.platform == "darwin":
         tf_platform = "darwin_amd64"
     elif sys.platform == "win32":
-        raise NotImplementedError("Windows is not supported at the mooment")
+        raise NotImplementedError("Windows is not supported at the moment")
     else:
-        raise NotImplementedError("Platform is not supported")
+        raise NotImplementedError("Platform {platform} is not supported".format(platform=sys.platform)
     tf_version = "0.14.2"
     tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
     tf_url = tf_template.format(v=tf_version, p=tf_platform)
