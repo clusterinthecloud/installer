@@ -34,19 +34,20 @@ def main():
 
     print("Installing Cluster in the Cloud on AWS")
 
-    try:
-        check_command = ["aws", "--dry-run", "ec2", "describe-images"]
-        if args.profile:
-            check_command.extend(["--profile", args.profile])
-        if args.region:
-            check_command.extend(["--region", args.region])
-        check_output(check_command, stderr=subprocess.STDOUT)
-    except CalledProcessError as e:
-        if "RequestExpired" in e.output.decode():
-            print("AWS credentials have expired:")
-        if "DryRunOperation" not in e.output.decode():
-            print(e.output.decode())
-            exit(1)
+    if not args.dry_run:
+        try:
+            check_command = ["aws", "--dry-run", "ec2", "describe-images"]
+            if args.profile:
+                check_command.extend(["--profile", args.profile])
+            if args.region:
+                check_command.extend(["--region", args.region])
+            check_output(check_command, stderr=subprocess.STDOUT)
+        except CalledProcessError as e:
+            if "RequestExpired" in e.output.decode():
+                print("AWS credentials have expired:")
+            if "DryRunOperation" not in e.output.decode():
+                print(e.output.decode())
+                exit(1)
 
     # Download the CitC Terraform repo
     print("Downloading CitC Terraform configuration")
