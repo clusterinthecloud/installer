@@ -17,6 +17,7 @@ except ImportError:
     from urllib import urlretrieve
 from zipfile import ZipFile
 
+
 def main():
     parser = argparse.ArgumentParser(description="Install Cluster in the Cloud")
     parser.add_argument("csp", choices=["aws"], help="Which cloud provider to install into")
@@ -25,7 +26,7 @@ def main():
     parser.add_argument("--availability_zone", help="AWS availability zone")
     parser.add_argument("--profile", help="AWS credentials profile")
     parser.add_argument("--terraform-repo", default="clusterinthecloud/terraform", help="CitC Terraform GitHub project repo to use")
-    parser.add_argument("--terraform-branch", default="tf_0_13_aws", help="CitC Terraform branch to use")
+    parser.add_argument("--terraform-branch", default="master", help="CitC Terraform branch to use")
     parser.add_argument("--ansible-repo", help="CitC Ansible repo to use")
     parser.add_argument("--ansible-branch", help="CitC Ansible branch to use")
     args = parser.parse_args()
@@ -63,7 +64,7 @@ def main():
         raise NotImplementedError("Windows is not supported at the moment")
     else:
         raise NotImplementedError("Platform {platform} is not supported".format(platform=sys.platform))
-    tf_version = "0.14.2"
+    tf_version = "1.0.3"
     tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
     tf_url = tf_template.format(v=tf_version, p=tf_platform)
     print("Downloading Terraform binary")
@@ -76,19 +77,19 @@ def main():
         check_call(["ssh-keygen", "-t", "rsa", "-f", "citc-key", "-N", ""])
 
     # Intialise Terraform
-    check_call(["./terraform", "init", args.csp])
-    check_call(["./terraform", "validate", args.csp])
+    check_call(["./terraform", "-chdir={}".format(args.csp), "init"])
+    check_call(["./terraform", "-chdir={}".format(args.csp), "validate"])
 
     # Set up the variable file
     config_file(args.csp, args)
 
     # Create the cluster
     if not args.dry_run:
-        check_call(["./terraform", "apply", "-auto-approve", args.csp])
+        check_call(["./terraform", "-chdir={}".format(args.csp), "apply", "-auto-approve"])
 
     # Get the outputs
-    ip = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
-    cluster_id = check_output(["./terraform", "output", "-no-color", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
+    ip = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
+    cluster_id = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
 
     os.chdir("..")
     new_dir_name = "citc-terraform-{}".format(cluster_id)
@@ -96,7 +97,7 @@ def main():
 
     key_path = "{}/citc-key".format(new_dir_name)
 
-    shutil.rmtree(os.path.join(new_dir_name, ".terraform"))
+    shutil.rmtree(os.path.join(new_dir_name, args.csp, ".terraform"))
     tf_zip = shutil.make_archive("citc-terraform", "zip", ".", new_dir_name)
     if not args.dry_run:
         while call(["scp", "-i", key_path, "-o", "StrictHostKeyChecking no", "-o", "IdentitiesOnly=yes", tf_zip, "citc@{}:.".format(ip)]) != 0:
@@ -129,7 +130,7 @@ def config_file(csp, args):
     if args.ansible_branch:
         config = config + '\nansible_branch = "{}"'.format(args.ansible_branch)
 
-    with open("terraform.tfvars", "w") as f:
+    with open(os.path.join(csp, "terraform.tfvars"), "w") as f:
         f.write(config)
 
 

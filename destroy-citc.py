@@ -54,16 +54,16 @@ def main():
     os.chdir(dir_name)
 
     os.chmod("terraform", stat.S_IRWXU)
-    check_call(["./terraform", "init", args.csp])
+    check_call(["./terraform", "-chdir={}".format(args.csp), "init"])
 
     if not args.dry_run:
         try:
             print("Destroying cluster...")
-            check_call(["./terraform", "destroy", "-auto-approve", args.csp])
+            check_call(["./terraform", "-chdir={}".format(args.csp), "apply", "-destroy", "-auto-approve"])
         except CalledProcessError:
             print("Terraform destroy failed. Try again with:")
             print("  cd {}".format(dir_name))
-            print("  ./terraform destroy {}".format(args.csp))
+            print("  ./terraform -chdir={} apply -destroy ".format(args.csp))
             print("You may need to manually clean up any remaining running instances or DNS entries")
 
 
