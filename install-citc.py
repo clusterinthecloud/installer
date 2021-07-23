@@ -9,6 +9,7 @@ import stat
 import subprocess
 import sys
 import shutil
+import tarfile
 import time
 from subprocess import call, check_call, check_output, CalledProcessError
 try:
@@ -47,10 +48,10 @@ def main():
             print(e.output.decode())
             exit(1)
 
-    #Download the CitC Terraform repo
+    # Download the CitC Terraform repo
     print("Downloading CitC Terraform configuration")
-    tf_repo_zip, _ = urlretrieve("https://github.com/{repo}/archive/{branch}.zip".format(repo=args.terraform_repo, branch=args.terraform_branch))
-    ZipFile(tf_repo_zip).extractall()
+    tf_repo_tar, _ = urlretrieve("https://github.com/{repo}/archive/{branch}.tar.gz".format(repo=args.terraform_repo, branch=args.terraform_branch))
+    tarfile.open(tf_repo_tar).extractall()
     shutil.rmtree("citc-terraform", ignore_errors=True)
     os.rename("terraform-{branch}".format(branch=args.terraform_branch), "citc-terraform")
     os.chdir("citc-terraform")
@@ -87,9 +88,13 @@ def main():
     if not args.dry_run:
         check_call(["./terraform", "-chdir={}".format(args.csp), "apply", "-auto-approve"])
 
-    # Get the outputs
-    ip = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
-    cluster_id = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
+        # Get the outputs
+        ip = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
+        cluster_id = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
+    else:
+        print("... pretending to create the cluster ...")
+        ip = "1.1.1.1"
+        cluster_id = "test-cluster"
 
     os.chdir("..")
     new_dir_name = "citc-terraform-{}".format(cluster_id)
@@ -98,11 +103,13 @@ def main():
     key_path = "{}/citc-key".format(new_dir_name)
 
     shutil.rmtree(os.path.join(new_dir_name, args.csp, ".terraform"))
-    tf_zip = shutil.make_archive("citc-terraform", "zip", ".", new_dir_name)
+    tf_zip = shutil.make_archive("citc-terraform", "gztar", ".", new_dir_name)
     if not args.dry_run:
         while call(["scp", "-i", key_path, "-o", "StrictHostKeyChecking no", "-o", "IdentitiesOnly=yes", tf_zip, "citc@{}:.".format(ip)]) != 0:
             print("Trying to upload Terraform state...")
             time.sleep(10)
+    else:
+        print("... pretending to upload the config {} to the cluster ...".format(tf_zip))
     os.remove(tf_zip)
 
     print("")
@@ -110,10 +117,13 @@ def main():
     print("")
     print("The file '{}' will allow you to log into the new cluster".format(key_path))
     print("Make sure you save this key as it is needed to destroy the cluster later.")
-
+    print("")
     print("The IP address of the cluster is {}".format(ip))
     print("Connect with:")
     print("  ssh -i {ssh_id} citc@{ip}".format(ssh_id=key_path, ip=ip))
+    print("")
+    print("You can destroy the cluster with:")
+    print("  python destroy-citc.py {csp} {ip} {ssh_id}".format(csp=args.csp, ip=ip, ssh_id=key_path))
 
 
 def config_file(csp, args):

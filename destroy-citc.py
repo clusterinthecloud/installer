@@ -8,12 +8,12 @@ import os.path
 import stat
 import sys
 import shutil
+import tarfile
 from subprocess import check_call, check_output, CalledProcessError
 try:
     from urllib.request import urlretrieve
 except ImportError:
     from urllib import urlretrieve
-from zipfile import ZipFile
 
 try:
     # Python 2/3 compatibility
@@ -36,12 +36,12 @@ def main():
         if proceed.lower() != "y":
             exit(1)
 
-    tf_zip_filename = "citc-terraform.zip"
+    tf_zip_filename = "citc-terraform.tar.gz"
     print("Downloading the Terraform configuration from {}".format(args.ip))
     check_call(["scp", "-i", args.key, "-o", "IdentitiesOnly=yes", "citc@{}:{}".format(args.ip, tf_zip_filename), "."])
-    tf_zip = ZipFile(tf_zip_filename)
-    dir_name = tf_zip.namelist()[0]
-    tf_zip.extractall()
+    tf_tar = tarfile.open(tf_zip_filename)
+    dir_name = tf_tar.getnames()[0]
+    tf_tar.extractall()
 
     # Shut down any running compute nodes and delete associated DNS entries
     if not args.dry_run:
