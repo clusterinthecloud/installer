@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        python-version: [2.7, 3.6]
+        python-version: [2.7, 3.6, 3.9]
         csp: [aws]
     runs-on: ${{ matrix.platform }}
     steps:
