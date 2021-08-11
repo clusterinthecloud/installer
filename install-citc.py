@@ -57,41 +57,26 @@ def main():
     os.rename("terraform-{branch}".format(branch=args.terraform_branch), "citc-terraform")
     os.chdir("citc-terraform")
 
-    # Download Terraform binary
-    if sys.platform.startswith("linux"):
-        tf_platform = "linux_amd64"
-    elif sys.platform == "darwin":
-        tf_platform = "darwin_amd64"
-    elif sys.platform == "win32":
-        raise NotImplementedError("Windows is not supported at the moment")
-    else:
-        raise NotImplementedError("Platform {platform} is not supported".format(platform=sys.platform))
-    tf_version = "1.0.3"
-    tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
-    tf_url = tf_template.format(v=tf_version, p=tf_platform)
-    print("Downloading Terraform binary")
-    tf_zip, _ = urlretrieve(tf_url)
-    ZipFile(tf_zip).extractall()
-    os.chmod("terraform", stat.S_IRWXU)
+    terraform = download_terraform("1.0.3")
 
     # Create key for admin and provisioning
     if not os.path.isfile("citc-key"):
         check_call(["ssh-keygen", "-t", "rsa", "-f", "citc-key", "-N", ""])
 
     # Intialise Terraform
-    check_call(["./terraform", "-chdir={}".format(args.csp), "init"])
-    check_call(["./terraform", "-chdir={}".format(args.csp), "validate"])
+    check_call([terraform, "-chdir={}".format(args.csp), "init"])
+    check_call([terraform, "-chdir={}".format(args.csp), "validate"])
 
     # Set up the variable file
     config_file(args.csp, args)
 
     # Create the cluster
     if not args.dry_run:
-        check_call(["./terraform", "-chdir={}".format(args.csp), "apply", "-auto-approve"])
+        check_call([terraform, "-chdir={}".format(args.csp), "apply", "-auto-approve"])
 
         # Get the outputs
-        ip = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
-        cluster_id = check_output(["./terraform", "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
+        ip = check_output([terraform, "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "ManagementPublicIP"]).decode().strip().strip('"')
+        cluster_id = check_output([terraform, "-chdir={}".format(args.csp), "output", "-no-color", "-raw", "-state=terraform.tfstate", "cluster_id"]).decode().strip().strip('"')
     else:
         print("... pretending to create the cluster ...")
         ip = "1.1.1.1"
@@ -125,6 +110,27 @@ def main():
     print("")
     print("You can destroy the cluster with:")
     print("  python destroy-citc.py {csp} {ip} {ssh_id}".format(csp=args.csp, ip=ip, ssh_id=key_path))
+
+
+def download_terraform(version):
+    """Download Terraform binary"""
+
+    if sys.platform.startswith("linux"):
+        tf_platform = "linux_amd64"
+    elif sys.platform == "darwin":
+        tf_platform = "darwin_amd64"
+    elif sys.platform == "win32":
+        raise NotImplementedError("Windows is not supported at the moment")
+    else:
+        raise NotImplementedError("Platform {platform} is not supported".format(platform=sys.platform))
+
+    tf_template = "https://releases.hashicorp.com/terraform/{v}/terraform_{v}_{p}.zip"
+    tf_url = tf_template.format(v=version, p=tf_platform)
+    print("Downloading Terraform binary")
+    tf_zip, _ = urlretrieve(tf_url)
+    ZipFile(tf_zip).extractall()
+    os.chmod("terraform", stat.S_IRWXU)
+    return "./terraform"
 
 
 def config_file(csp, args):
