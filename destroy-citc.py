@@ -6,10 +6,8 @@ import argparse
 import os
 import os.path
 import stat
-import sys
-import shutil
 import tarfile
-from subprocess import check_call, check_output, CalledProcessError
+from subprocess import check_call, CalledProcessError
 try:
     from urllib.request import urlretrieve
 except ImportError:
@@ -36,6 +34,7 @@ def main():
         if proceed.lower() != "y":
             exit(1)
 
+    # Download the Terraform configuration from the cluster
     tf_zip_filename = "citc-terraform.tar.gz"
     print("Downloading the Terraform configuration from {}".format(args.ip))
     check_call(["scp", "-i", args.key, "-o", "IdentitiesOnly=yes", "citc@{}:{}".format(args.ip, tf_zip_filename), "."])

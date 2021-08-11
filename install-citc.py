@@ -82,6 +82,7 @@ def main():
         ip = "1.1.1.1"
         cluster_id = "test-cluster"
 
+    # Upload the config to the cluster
     os.chdir("..")
     new_dir_name = "citc-terraform-{}".format(cluster_id)
     os.rename("citc-terraform", new_dir_name)
@@ -99,7 +100,7 @@ def main():
     os.remove(tf_zip)
 
     print("")
-    print("#"*80)
+    print("#" * 80)
     print("")
     print("The file '{}' will allow you to log into the new cluster".format(key_path))
     print("Make sure you save this key as it is needed to destroy the cluster later.")
@@ -113,7 +114,7 @@ def main():
 
 
 def download_terraform(version):
-    """Download Terraform binary"""
+    """Download Terraform binary and return its path"""
 
     if sys.platform.startswith("linux"):
         tf_platform = "linux_amd64"

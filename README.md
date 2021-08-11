@@ -2,8 +2,9 @@
 
 Heterogenerous, scalable compute clusters in the cloud.
 
-## Installer script
-
 Requirements:
-- Python >= 2.7
+- Linux or MacOS
+- Python ≥ 2.7
 - `ssh`, `ssh-keygen` and `scp`
+
+Instructions at https://cluster-in-the-cloud.readthedocs.io
